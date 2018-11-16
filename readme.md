@@ -15,7 +15,7 @@ go get github.com/jurschreuder/ffsdb
 ## create a new database 
 create at path test.db\
 save []float64 slices of length 256\
-overwrite old database\
+overwrite old database
 ```go
 fdb, err := NewFfsdb("test.db", 256, true) // (filepath, []float64 length, overwrite old file)
 ```
