@@ -7,13 +7,13 @@ import (
 
 func TestFfsdb(t *testing.T) {
 	// create a new database at path 'test.db'
-	fdb, err := NewFfsdb("test.db", 8, true)
+	fdb, err := NewFfsdb("test.db", 256, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// example float64 slice to save in the database
-	foo := []float64{1, 2, 3, 4, 5, 6, 7, 8}
+	foo := make([]float64, 256)
 
 	start := time.Now()
 	for i := 0; i < 100e3; i++ {

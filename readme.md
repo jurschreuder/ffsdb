@@ -27,7 +27,7 @@ err := fdb.Add(foo)
 ```
 
 ## read all entries in the datebase from the beginning
-wher foo is a []float64
+where foo is a []float64
 ```go
 fdb.Rewind()
 ok := true
@@ -36,5 +36,10 @@ for ok {
 }
 ```
 
-### ToDo
-make ReadNext() faster
+## performance
+for []float64 with length 256\
+on 2018 mac book
+```
+ffsdb_test.go:27: added 100k in time: 2.941440309s
+ffsdb_test.go:41: read 100k in time: 1.178950645s
+```
