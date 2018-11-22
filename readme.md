@@ -47,7 +47,7 @@ vals, err := fdb.ReadId(id)
 ```go
 id = int64(100)
 foo = make([]float64, 256)
-err := fdb.ReadId(id, foo)
+err := fdb.Update(id, foo)
 ```
 
 ## performance
