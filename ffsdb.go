@@ -15,6 +15,7 @@ type Ffsdb struct {
 	sliceLen   int
 	sliceLenBs int64
 	fd         *os.File
+	fdAt       *os.File
 	reader     *bufio.Reader
 	writer     *bufio.Writer
 	buffer     []byte
@@ -29,11 +30,16 @@ func NewFfsdb(path string, sliceLen int, removeOld bool) (*Ffsdb, error) {
 	if err != nil {
 		return &Ffsdb{}, nil
 	}
+	fdAt, err := os.OpenFile(path, os.O_WRONLY, 0644)
+	if err != nil {
+		return &Ffsdb{}, nil
+	}
 	fdb := Ffsdb{
 		Path:       path,
 		sliceLen:   sliceLen,
 		sliceLenBs: int64(sliceLen * 8),
 		fd:         fd,
+		fdAt:       fdAt,
 		reader:     bufio.NewReaderSize(fd, sliceLen*8),
 		writer:     bufio.NewWriter(fd),
 		buffer:     make([]byte, sliceLen*8),
@@ -146,7 +152,7 @@ func (fdb *Ffsdb) Update(id int64, vals []float64) error {
 
 func (fdb *Ffsdb) UpdateUnsafe(id int64, vals []float64) error {
 	Float64SliceToBytes(vals, fdb.buffer)
-	_, err := fdb.fd.WriteAt(fdb.buffer, id*fdb.sliceLenBs)
+	_, err := fdb.fdAt.WriteAt(fdb.buffer, id*fdb.sliceLenBs)
 	return err
 }
 
