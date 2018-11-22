@@ -3,6 +3,8 @@ package ffsdb
 import (
 	"bufio"
 	"encoding/binary"
+	"errors"
+	"fmt"
 	"math"
 	"os"
 )
@@ -10,12 +12,13 @@ import (
 type Ffsdb struct {
 	Path string
 
-	sliceLen  int
-	fd        *os.File
-	reader    *bufio.Reader
-	writer    *bufio.Writer
-	buffer    []byte
-	isFlushed bool
+	sliceLen   int
+	sliceLenBs int64
+	fd         *os.File
+	reader     *bufio.Reader
+	writer     *bufio.Writer
+	buffer     []byte
+	isFlushed  bool
 }
 
 func NewFfsdb(path string, sliceLen int, removeOld bool) (*Ffsdb, error) {
@@ -27,13 +30,14 @@ func NewFfsdb(path string, sliceLen int, removeOld bool) (*Ffsdb, error) {
 		return &Ffsdb{}, nil
 	}
 	fdb := Ffsdb{
-		Path:      path,
-		sliceLen:  sliceLen,
-		fd:        fd,
-		reader:    bufio.NewReaderSize(fd, sliceLen*8),
-		writer:    bufio.NewWriter(fd),
-		buffer:    make([]byte, sliceLen*8),
-		isFlushed: true,
+		Path:       path,
+		sliceLen:   sliceLen,
+		sliceLenBs: int64(sliceLen * 8),
+		fd:         fd,
+		reader:     bufio.NewReaderSize(fd, sliceLen*8),
+		writer:     bufio.NewWriter(fd),
+		buffer:     make([]byte, sliceLen*8),
+		isFlushed:  true,
 	}
 	return &fdb, nil
 }
@@ -83,6 +87,27 @@ func (fdb *Ffsdb) Rewind() {
 	fdb.fd.Seek(0, 0)
 }
 
+func (fdb *Ffsdb) Seek(id int64) error {
+	_, err := fdb.fd.Seek(id*fdb.sliceLenBs, 0)
+	return err
+}
+
+func (fdb *Ffsdb) ReadId(id int64) ([]float64, error) {
+	if !fdb.isFlushed {
+		fdb.Flush()
+	}
+	err := fdb.Seek(id)
+	if err != nil {
+		return []float64{}, err
+	}
+	_, err = fdb.reader.Read(fdb.buffer)
+	//_, err := fdb.fd.Read(fdb.buffer)
+	if err != nil {
+		return []float64{}, err
+	}
+	return BytesToFloat64Slice(fdb.buffer), nil
+}
+
 func (fdb *Ffsdb) ReadNext() ([]float64, bool) {
 	if !fdb.isFlushed {
 		fdb.Flush()
@@ -99,9 +124,29 @@ func (fdb *Ffsdb) ReadNext() ([]float64, bool) {
 }
 
 func (fdb *Ffsdb) Add(vals []float64) error {
+	if len(vals) != fdb.sliceLen {
+		return errors.New(fmt.Sprint("vals length was ", len(vals), " expected ", fdb.sliceLen))
+	}
+	return fdb.AddUnsafe(vals)
+}
+
+func (fdb *Ffsdb) AddUnsafe(vals []float64) error {
 	fdb.isFlushed = false
 	Float64SliceToBytes(vals, fdb.buffer)
 	_, err := fdb.writer.Write(fdb.buffer)
+	return err
+}
+
+func (fdb *Ffsdb) Update(id int64, vals []float64) error {
+	if len(vals) != fdb.sliceLen {
+		return errors.New(fmt.Sprint("vals length was ", len(vals), " expected ", fdb.sliceLen))
+	}
+	return fdb.UpdateUnsafe(id, vals)
+}
+
+func (fdb *Ffsdb) UpdateUnsafe(id int64, vals []float64) error {
+	Float64SliceToBytes(vals, fdb.buffer)
+	_, err := fdb.fd.WriteAt(fdb.buffer, id*fdb.sliceLenBs)
 	return err
 }
 

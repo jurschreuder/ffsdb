@@ -23,6 +23,7 @@ fdb, err := NewFfsdb("test.db", 256, true) // (filepath, []float64 length, overw
 ## add new entry to the database
 where foo is a []float64
 ```go
+foo := make([]float64, 265)
 err := fdb.Add(foo)
 ```
 
@@ -34,6 +35,19 @@ ok := true
 for ok {
     foo, ok = fdb.ReadNext()
 }
+```
+
+## read an entry at a specific id
+```go
+id = int64(100)
+vals, err := fdb.ReadId(id)
+```
+
+## update an entry at a specific id
+```go
+id = int64(100)
+foo = make([]float64, 256)
+err := fdb.ReadId(id, foo)
 ```
 
 ## performance
