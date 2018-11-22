@@ -54,6 +54,6 @@ err := fdb.Update(id, foo)
 for []float64 with length 256\
 on 2018 mac book
 ```
-ffsdb_test.go:27: added 100k in time: 2.941440309s
-ffsdb_test.go:41: read 100k in time: 1.178950645s
+ffsdb_test.go:27: added 100000 in time: 1.62976014s
+ffsdb_test.go:41: read 100000 in time: 580.782646ms
 ```
