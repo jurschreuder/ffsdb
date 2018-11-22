@@ -23,7 +23,7 @@ fdb, err := NewFfsdb("test.db", 256, true) // (filepath, []float64 length, overw
 ## add new entry to the database
 where foo is a []float64
 ```go
-foo := make([]float64, 265)
+foo := make([]float64, 256)
 err := fdb.Add(foo)
 ```
 
