@@ -86,6 +86,11 @@ func BytesToFloat64Slice(bs []byte) []float64 {
 	return fs
 }
 
+func (fdb *Ffsdb) Close() {
+	fdb.fd.Close()
+	fdb.fdAt.Close()
+}
+
 func (fdb *Ffsdb) Rewind() {
 	if !fdb.isFlushed {
 		fdb.Flush()

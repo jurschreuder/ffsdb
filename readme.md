@@ -18,6 +18,10 @@ save []float64 slices of length 256\
 overwrite old database
 ```go
 fdb, err := NewFfsdb("test.db", 256, true) // (filepath, []float64 length, overwrite old file)
+if err != nil {
+    panic(err)
+}
+defer fdb.Close()
 ```
 
 ## add new entry to the database

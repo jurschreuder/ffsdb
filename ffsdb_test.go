@@ -11,6 +11,7 @@ func TestFfsdb(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer fdb.Close()
 
 	// example float64 slice to save in the database
 	foo := make([]float64, 256)
@@ -47,6 +48,7 @@ func TestSeek(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer fdb.Close()
 
 	// example float64 slice to save in the database
 	foo := make([]float64, 2)
